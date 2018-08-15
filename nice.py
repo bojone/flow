@@ -31,12 +31,6 @@ class Shuffle(Layer):
     def call(self, inputs):
         v_dim = K.int_shape(inputs)[-1]
         if self.idxs == None:
-            '''
-    In case anyone else runs into this problem, there is an issue with tf.gather(tf.shape(input_), 
-    range(ndim-1)) using python 3 because range(ndim-1) cannot be automatically converted to a tensor. 
-    Replacing it with list(range(ndim-1)) to explicitly cast it to a list resolves that specific error        
-            '''
-            #self.idxs = range(v_dim)
             self.idxs = list(range(v_dim))
             if self.mode == 'inverse':
                 self.idxs = self.idxs[::-1]
@@ -114,9 +108,9 @@ class Scale(Layer):
         self.kernel = self.add_weight(name='kernel', 
                                       shape=(1, input_shape[1]),
                                       initializer='glorot_normal',
-                                      regularizer=lambda x: -K.sum(x), # 行列式对数可以作为正则项加入
                                       trainable=True)
     def call(self, inputs):
+        self.add_loss(-K.sum(self.kernel)) # 对数行列式
         return K.exp(self.kernel) * inputs
     def inverse(self):
         scale = K.exp(-self.kernel)
