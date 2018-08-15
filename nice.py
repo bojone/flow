@@ -31,7 +31,13 @@ class Shuffle(Layer):
     def call(self, inputs):
         v_dim = K.int_shape(inputs)[-1]
         if self.idxs == None:
-            self.idxs = range(v_dim)
+            '''
+    In case anyone else runs into this problem, there is an issue with tf.gather(tf.shape(input_), 
+    range(ndim-1)) using python 3 because range(ndim-1) cannot be automatically converted to a tensor. 
+    Replacing it with list(range(ndim-1)) to explicitly cast it to a list resolves that specific error        
+            '''
+            #self.idxs = range(v_dim)
+            self.idxs = list(range(v_dim))
             if self.mode == 'inverse':
                 self.idxs = self.idxs[::-1]
             elif self.mode == 'random':
