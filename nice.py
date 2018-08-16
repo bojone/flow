@@ -1,5 +1,5 @@
 #! -*- coding: utf-8 -*-
-# Keras implement of NICE
+# Keras implement of NICE (Non-linear Independent Components Estimation)
 # https://arxiv.org/abs/1410.8516
 
 from keras.layers import *
