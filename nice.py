@@ -239,7 +239,7 @@ figure = np.zeros((digit_size * n, digit_size * n))
 
 for i in range(n):
     for j in range(n):
-        z_sample = np.array(np.random.randn(1, original_dim)) * 0.8 # 标准差取0.8而不是1
+        z_sample = np.array(np.random.randn(1, original_dim)) * 0.75 # 标准差取0.75而不是1
         x_decoded = decoder.predict(z_sample)
         digit = x_decoded[0].reshape(digit_size, digit_size)
         figure[i * digit_size: (i + 1) * digit_size,
