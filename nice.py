@@ -24,7 +24,7 @@ class Shuffle(Layer):
     """打乱层，提供两种方式打乱输入维度
     一种是直接反转，一种是随机打乱，默认是直接反转维度
     """
-    def __init__(self, idxs=None, mode='inverse', **kwargs):
+    def __init__(self, idxs=None, mode='reverse', **kwargs):
         super(Shuffle, self).__init__(**kwargs)
         self.idxs = idxs
         self.mode = mode
@@ -32,7 +32,7 @@ class Shuffle(Layer):
         v_dim = K.int_shape(inputs)[-1]
         if self.idxs == None:
             self.idxs = list(range(v_dim))
-            if self.mode == 'inverse':
+            if self.mode == 'reverse':
                 self.idxs = self.idxs[::-1]
             elif self.mode == 'random':
                 np.random.shuffle(self.idxs)
