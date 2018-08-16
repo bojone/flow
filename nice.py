@@ -147,6 +147,9 @@ basic_model_4 = build_basic_model(original_dim//2)
 x_in = Input(shape=(original_dim,))
 x = x_in
 
+# 给输入加入负噪声
+x = Lambda(lambda s: K.in_train_phase(s-0.01*K.random_uniform(K.shape(s)), s))(x)
+
 x = shuffle1(x)
 x1,x2 = split(x)
 mx1 = basic_model_1(x1)
