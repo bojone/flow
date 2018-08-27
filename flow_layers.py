@@ -1,5 +1,6 @@
 #! -*- coding: utf-8 -*-
 
+import numpy as np
 import keras.backend as K
 from keras.layers import Layer
 
