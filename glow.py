@@ -134,7 +134,7 @@ x = final_concat(x_outs+[x])
 
 encoder = Model(x_in, x)
 encoder.summary()
-encoder.compile(loss=lambda y_true,y_pred: K.sum(0.5 * y_pred**2, 1),
+encoder.compile(loss=lambda y_true,y_pred: 0.5 * K.sum(y_pred**2, 1) + 0.5 * np.log(2*np.pi) * K.int_shape(y_pred)[1],
                 optimizer=Adam(1e-4))
 
 
