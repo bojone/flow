@@ -229,11 +229,13 @@ class Actnorm(Layer):
     def __init__(self,
                  isinverse=False,
                  add_logdet_to_loss=True,
+                 use_shift=True,
                  **kwargs):
         self.log_scale = None
         self.shift = None
         self.isinverse = isinverse
         self.add_logdet_to_loss = add_logdet_to_loss
+        self.use_shift = use_shift
         super(Actnorm, self).__init__(**kwargs)
     def build(self, input_shape):
         kernel_shape = (1,)*(len(input_shape)-1) + (input_shape[-1],)
@@ -242,11 +244,13 @@ class Actnorm(Layer):
                                              shape=kernel_shape,
                                              initializer='zeros',
                                              trainable=True)
-        if self.shift is None:
+        if self.use_shift and self.shift is None:
             self.shift = self.add_weight(name='shift',
                                          shape=kernel_shape,
                                          initializer='zeros',
                                          trainable=True)
+        if not self.use_shift:
+            self.shift = 0
     def call(self, inputs):
         if self.isinverse:
             logdet = K.sum(self.log_scale)
@@ -274,22 +278,28 @@ class CondActnorm(Layer):
     def __init__(self,
                  isinverse=False,
                  add_logdet_to_loss=True,
+                 use_shift=True,
                  **kwargs):
         self.kernel = None
         self.bias = None
         self.isinverse = isinverse
         self.add_logdet_to_loss = add_logdet_to_loss
+        self.use_shift = use_shift
         super(CondActnorm, self).__init__(**kwargs)
     def build(self, input_shape):
         in_dim = input_shape[0][-1]
+        if self.use_shift:
+            out_dim = in_dim * 2
+        else:
+            out_dim = in_dim
         if self.kernel is None:
             self.kernel = self.add_weight(name='kernel',
-                                          shape=(3, 3, in_dim, in_dim*2),
+                                          shape=(3, 3, in_dim, out_dim),
                                           initializer='zeros',
                                           trainable=True)
         if self.bias is None:
             self.bias = self.add_weight(name='bias',
-                                        shape=(in_dim*2,),
+                                        shape=(out_dim,),
                                         initializer='zeros',
                                         trainable=True)
     def call(self, inputs):
@@ -297,7 +307,10 @@ class CondActnorm(Layer):
         in_dim = K.int_shape(x1)[-1]
         x2_conv2d = K.conv2d(x2, self.kernel, padding='same')
         x2_conv2d = K.bias_add(x2_conv2d, self.bias)
-        log_scale,shift = x2_conv2d[..., :in_dim], x2_conv2d[..., in_dim:]
+        if self.use_shift:
+            log_scale,shift = x2_conv2d[..., :in_dim], x2_conv2d[..., in_dim:]
+        else:
+            log_scale,shift = x2_conv2d, 0
         if self.isinverse:
             logdet = K.sum(K.mean(log_scale, 0))
             x_outs = K.exp(-log_scale) * (x1 - shift)
