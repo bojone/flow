@@ -250,7 +250,7 @@ class Actnorm(Layer):
                                          initializer='zeros',
                                          trainable=True)
         if not self.use_shift:
-            self.shift = 0
+            self.shift = 0.
     def call(self, inputs):
         if self.isinverse:
             logdet = K.sum(self.log_scale)
@@ -310,7 +310,7 @@ class CondActnorm(Layer):
         if self.use_shift:
             log_scale,shift = x2_conv2d[..., :in_dim], x2_conv2d[..., in_dim:]
         else:
-            log_scale,shift = x2_conv2d, 0
+            log_scale,shift = x2_conv2d, 0.
         if self.isinverse:
             logdet = K.sum(K.mean(log_scale, 0))
             x_outs = K.exp(-log_scale) * (x1 - shift)
