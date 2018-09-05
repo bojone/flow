@@ -48,7 +48,7 @@ def data_generator(batch_size=32):
                 X = []
 
                 
-def build_basic_model(in_size, in_channel):
+def build_basic_model(in_channel):
     """基础模型，即耦合层中的模型（basic model for Coupling）
     """
     _in = Input(shape=(None, None, in_channel))
@@ -61,7 +61,6 @@ def build_basic_model(in_size, in_channel):
     _ = Activation('relu')(_)
     _ = Conv2D(hidden_dim,
                (1, 1),
-               activation='relu',
                padding='same')(_)
     # _ = Actnorm(add_logdet_to_loss=False)(_)
     _ = Activation('relu')(_)
@@ -95,7 +94,7 @@ for i in range(level):
         actnorm = Actnorm()
         permute = Permute(mode='random')
         split = Split()
-        couple = CoupleWrapper(build_basic_model(img_size//2**(i+1), 3*2**(i+1)))
+        couple = CoupleWrapper(build_basic_model(3*2**(i+1)))
         concat = Concat()
         inner_layers[0].append(actnorm)
         inner_layers[1].append(permute)
