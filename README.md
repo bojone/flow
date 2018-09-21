@@ -16,6 +16,6 @@ with Invertible 1×1 Convolutions, [intro]( https://kexue.fm/archives/5807))
 
 
 [f-VAEs.py](https://github.com/bojone/flow/blob/master/f-VAEs.py): f-VAEs (f-VAEs: Improve VAEs with Conditional Flows
-, [intro]( https://kexue.fm/archives/5977),[arxiv](https://arxiv.org/abs/1809.05861))
+, [intro]( https://kexue.fm/archives/5977), [arxiv](https://arxiv.org/abs/1809.05861))
 
 <img src="https://kexue.fm/usr/uploads/2018/09/3123911138.png" height=256 />
