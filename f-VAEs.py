@@ -193,6 +193,11 @@ vae_loss = recon_loss + z_loss
 
 vae = Model(x_in, [x_recon, z])
 vae.add_loss(vae_loss)
+
+for l in vae.layers:
+    if hasattr(l, 'logdet'):
+        vae.add_loss(l.logdet)
+
 vae.compile(optimizer=Adam(1e-4))
 
 total_encoder = Model(x_in, z)
