@@ -365,7 +365,7 @@ class Squeeze(Layer):
 
 
 class UnSqueeze(Layer):
-    """shape=h, w, c] ==> shape=[h*n, w*n, c/(n*n)]
+    """shape=[h, w, c] ==> shape=[h*n, w*n, c/(n*n)]
     """
     def __init__(self, factor=2, **kwargs):
         self.factor = factor
