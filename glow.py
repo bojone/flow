@@ -130,6 +130,9 @@ x = final_actnorm(x)
 x = final_reshape(x)
 x = final_concat(x_outs+[x])
 
+for l in encoder.layers:
+    if hasattr(l, 'logdet'):
+        encoder.add_loss(l.logdet)
 
 encoder = Model(x_in, x)
 encoder.summary()
