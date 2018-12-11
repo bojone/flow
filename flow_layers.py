@@ -58,11 +58,9 @@ class InvDense(Layer):
     """
     def __init__(self,
                  isinverse=False,
-                 add_logdet_to_loss=True,
                  **kwargs):
         self.kernel = None
         self.isinverse = isinverse
-        self.add_logdet_to_loss = add_logdet_to_loss
         super(InvDense, self).__init__(**kwargs)
     def initializer(self, shape):
         """通过随机正交矩阵进行LU分解初始化
@@ -115,8 +113,7 @@ class InvDense(Layer):
             x_outs = K.dot(inputs, self.kernel)
         if K.ndim(inputs) > 2:
             logdet *= K.prod(K.cast(K.shape(inputs)[1:-1], 'float32'))
-        if self.add_logdet_to_loss:
-            self.add_loss(logdet)
+        self.logdet = logdet
         return x_outs
     def inverse(self):
         layer = InvDense(not self.isinverse)
@@ -167,10 +164,8 @@ class AffineCouple(Layer):
     """
     def __init__(self,
                  isinverse=False,
-                 add_logdet_to_loss=True,
                  **kwargs):
         self.isinverse = isinverse
-        self.add_logdet_to_loss = add_logdet_to_loss
         super(AffineCouple, self).__init__(**kwargs)
     def call(self, inputs):
         """如果inputs的长度为3，那么就是加性耦合，否则就是一般的仿射耦合。
@@ -188,8 +183,7 @@ class AffineCouple(Layer):
         else:
             logdet = -K.sum(K.mean(log_scale, 0)) # 对数行列式
             x_outs = [x1, K.exp(log_scale) * x2 + shift]
-        if self.add_logdet_to_loss:
-            self.add_loss(logdet)
+        self.logdet = logdet
         return x_outs
     def inverse(self):
         layer = AffineCouple(not self.isinverse)
@@ -228,13 +222,11 @@ class Actnorm(Layer):
     """
     def __init__(self,
                  isinverse=False,
-                 add_logdet_to_loss=True,
                  use_shift=True,
                  **kwargs):
         self.log_scale = None
         self.shift = None
         self.isinverse = isinverse
-        self.add_logdet_to_loss = add_logdet_to_loss
         self.use_shift = use_shift
         super(Actnorm, self).__init__(**kwargs)
     def build(self, input_shape):
@@ -260,8 +252,7 @@ class Actnorm(Layer):
             x_outs = K.exp(self.log_scale) * inputs + self.shift
         if K.ndim(inputs) > 2:
             logdet *= K.prod(K.cast(K.shape(inputs)[1:-1], 'float32'))
-        if self.add_logdet_to_loss:
-            self.add_loss(logdet)
+        self.logdet = logdet
         return x_outs
     def inverse(self):
         layer = Actnorm(not self.isinverse)
@@ -277,13 +268,11 @@ class CondActnorm(Layer):
     """
     def __init__(self,
                  isinverse=False,
-                 add_logdet_to_loss=True,
                  use_shift=True,
                  **kwargs):
         self.kernel = None
         self.bias = None
         self.isinverse = isinverse
-        self.add_logdet_to_loss = add_logdet_to_loss
         self.use_shift = use_shift
         super(CondActnorm, self).__init__(**kwargs)
     def build(self, input_shape):
@@ -317,8 +306,7 @@ class CondActnorm(Layer):
         else:
             logdet = -K.sum(K.mean(log_scale, 0))
             x_outs = K.exp(log_scale) * x1 + shift
-        if self.add_logdet_to_loss:
-            self.add_loss(logdet)
+        self.logdet = logdet
         return x_outs
     def inverse(self):
         layer = CondActnorm(not self.isinverse)
