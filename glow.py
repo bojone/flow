@@ -130,11 +130,11 @@ x = final_actnorm(x)
 x = final_reshape(x)
 x = final_concat(x_outs+[x])
 
+encoder = Model(x_in, x)
 for l in encoder.layers:
     if hasattr(l, 'logdet'):
         encoder.add_loss(l.logdet)
-
-encoder = Model(x_in, x)
+        
 encoder.summary()
 encoder.compile(loss=lambda y_true,y_pred: 0.5 * K.sum(y_pred**2, 1) + 0.5 * np.log(2*np.pi) * K.int_shape(y_pred)[1],
                 optimizer=Adam(1e-4))
