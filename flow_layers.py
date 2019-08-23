@@ -16,6 +16,7 @@ class Permute(Layer):
         self.idxs = None # 打乱顺序的序id
         self.mode = mode
     def build(self, input_shape):
+        super(Permute, self).build(input_shape)
         in_dim = input_shape[-1]
         if self.idxs is None:
             if self.mode == 'reverse':
@@ -60,9 +61,9 @@ class InvDense(Layer):
     def __init__(self,
                  isinverse=False,
                  **kwargs):
+        super(InvDense, self).__init__(**kwargs)
         self.kernel = None
         self.isinverse = isinverse
-        super(InvDense, self).__init__(**kwargs)
     def initializer(self, shape):
         """通过随机正交矩阵进行LU分解初始化
         """
@@ -77,6 +78,7 @@ class InvDense(Layer):
         u_mask = 1 - sp.tri(shape[-1]) # u的mask，上三角全1阵（但对角线全0）
         return p, l, u, u_diag_sign, u_diag_abs_log, l_mask, u_mask
     def build(self, input_shape):
+        super(InvDense, self).build(input_shape)
         if self.kernel is None:
             (p, l, u, u_diag_sign, u_diag_abs_log,
                 l_mask, u_mask) = self.initializer(input_shape)
@@ -129,8 +131,8 @@ class Split(Layer):
     split inputs into several parts according pattern
     """
     def __init__(self, pattern=None, **kwargs):
-        self.pattern = pattern
         super(Split, self).__init__(**kwargs)
+        self.pattern = pattern
     def call(self, inputs):
         if self.pattern is None:
             in_dim = K.int_shape(inputs)[-1]
@@ -166,8 +168,8 @@ class AffineCouple(Layer):
     def __init__(self,
                  isinverse=False,
                  **kwargs):
-        self.isinverse = isinverse
         super(AffineCouple, self).__init__(**kwargs)
+        self.isinverse = isinverse
     def call(self, inputs):
         """如果inputs的长度为3，那么就是加性耦合，否则就是一般的仿射耦合。
         if len(inputs) == 3, it equals additive coupling.
@@ -225,12 +227,13 @@ class Actnorm(Layer):
                  isinverse=False,
                  use_shift=True,
                  **kwargs):
+        super(Actnorm, self).__init__(**kwargs)
         self.log_scale = None
         self.shift = None
         self.isinverse = isinverse
         self.use_shift = use_shift
-        super(Actnorm, self).__init__(**kwargs)
     def build(self, input_shape):
+        super(Actnorm, self).build(input_shape)
         kernel_shape = (1,)*(len(input_shape)-1) + (input_shape[-1],)
         if self.log_scale is None:
             self.log_scale = self.add_weight(name='log_scale',
@@ -271,12 +274,13 @@ class CondActnorm(Layer):
                  isinverse=False,
                  use_shift=True,
                  **kwargs):
+        super(CondActnorm, self).__init__(**kwargs)
         self.kernel = None
         self.bias = None
         self.isinverse = isinverse
         self.use_shift = use_shift
-        super(CondActnorm, self).__init__(**kwargs)
     def build(self, input_shape):
+        super(CondActnorm, self).build(input_shape)
         in_dim = input_shape[0][-1]
         if self.use_shift:
             out_dim = in_dim * 2
@@ -322,8 +326,8 @@ class Reshape(Layer):
     combination of keras's Reshape and Flatten. And add inverse().
     """
     def __init__(self, shape=None, **kwargs):
-        self.shape = shape
         super(Reshape, self).__init__(**kwargs)
+        self.shape = shape
     def call(self, inputs):
         self.in_shape = [i or -1 for i in K.int_shape(inputs)]
         if self.shape is None:
@@ -339,8 +343,8 @@ class Squeeze(Layer):
     """shape=[h, w, c] ==> shape=[h/n, w/n, n*n*c]
     """
     def __init__(self, factor=2, **kwargs):
-        self.factor = factor
         super(Squeeze, self).__init__(**kwargs)
+        self.factor = factor
     def call(self, inputs):
         height, width, channel = K.int_shape(inputs)[1:]
         assert height % self.factor == 0 and width % self.factor == 0
@@ -369,8 +373,8 @@ class UnSqueeze(Layer):
     """shape=[h, w, c] ==> shape=[h*n, w*n, c/(n*n)]
     """
     def __init__(self, factor=2, **kwargs):
-        self.factor = factor
         super(UnSqueeze, self).__init__(**kwargs)
+        self.factor = factor
     def call(self, inputs):
         height, width, channel = K.int_shape(inputs)[1:]
         assert channel % (self.factor**2) == 0
