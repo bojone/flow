@@ -3,6 +3,7 @@
 import numpy as np
 import keras.backend as K
 from keras.layers import Layer
+import tensorflow as tf
 
 
 class Permute(Layer):
@@ -29,10 +30,10 @@ class Permute(Layer):
                                             dtype='int32',
                                             initializer=self.random_initializer,
                                             trainable=False)
-    def reverse_initializer(self, shape):
+    def reverse_initializer(self, shape, dtype=None):
         idxs = range(shape[0])
         return idxs[::-1]
-    def random_initializer(self, shape):
+    def random_initializer(self, shape, dtype=None):
         idxs = range(shape[0])
         np.random.shuffle(idxs)
         return idxs
@@ -44,7 +45,7 @@ class Permute(Layer):
         return x_outs
     def inverse(self):
         in_dim = K.int_shape(self.idxs)[0]
-        reverse_idxs = K.tf.nn.top_k(self.idxs, in_dim)[1][::-1]
+        reverse_idxs = tf.nn.top_k(self.idxs, in_dim)[1][::-1]
         layer = Permute()
         layer.idxs = reverse_idxs
         return layer
@@ -100,14 +101,14 @@ class InvDense(Layer):
                                                          initializer=lambda _: u_diag_abs_log,
                                                          trainable=True)
             self.kernel_l = self.kernel_l * l_mask + K.eye(input_shape[-1])
-            self.kernel_u = self.kernel_u * u_mask + K.tf.diag(
+            self.kernel_u = self.kernel_u * u_mask + tf.diag(
                 self.kernel_u_diag_sign * K.exp(self.kernel_u_diag_abs_log))
             self.kernel = K.dot(K.dot(self.kernel_p, self.kernel_l),
                                 self.kernel_u)
     def call(self, inputs):
         if self.isinverse:
             logdet = K.sum(self.kernel_u_diag_abs_log)
-            x_outs = K.dot(inputs, K.tf.matrix_inverse(self.kernel))
+            x_outs = K.dot(inputs, tf.matrix_inverse(self.kernel))
         else:
             logdet = -K.sum(self.kernel_u_diag_abs_log)
             x_outs = K.dot(inputs, self.kernel)
