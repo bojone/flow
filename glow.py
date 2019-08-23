@@ -19,24 +19,21 @@ import os
 if not os.path.exists('samples'):
     os.mkdir('samples')
 
-imgs = glob.glob('img_align_celeba/*.jpg')
 
-height,width = misc.imread(imgs[0]).shape[:2]
-center_height = int((height - width) / 2)
-
+imgs = glob.glob('../../CelebA-HQ/train/*.png')
 img_size = 64  # for a fast try, please use img_size=32
 depth = 10  # orginal paper use depth=32
 level = 3  # orginal paper use level=6 for 256*256 CelebA HQ
 
 
 def imread(f):
-    x = misc.imread(f)
-    x = x[center_height:center_height+width, :]
+    x = misc.imread(f, mode='RGB')
     x = misc.imresize(x, (img_size, img_size))
-    return x.astype(np.float32) / 256 - 0.5
+    x = x.astype(np.float32)
+    return x / 255 * 2 - 1
 
 
-def data_generator(batch_size=32):
+def data_generator(batch_size=64):
     X = []
     while True:
         np.random.shuffle(imgs)
@@ -47,7 +44,7 @@ def data_generator(batch_size=32):
                 yield X,X.reshape((X.shape[0], -1))
                 X = []
 
-                
+
 def build_basic_model(in_channel):
     """基础模型，即耦合层中的模型（basic model for Coupling）
     """
@@ -134,7 +131,7 @@ encoder = Model(x_in, x)
 for l in encoder.layers:
     if hasattr(l, 'logdet'):
         encoder.add_loss(l.logdet)
-        
+
 encoder.summary()
 encoder.compile(loss=lambda y_true,y_pred: 0.5 * K.sum(y_pred**2, 1) + 0.5 * np.log(2*np.pi) * K.int_shape(y_pred)[1],
                 optimizer=Adam(1e-4))
@@ -172,7 +169,7 @@ for i,(split,condactnorm,reshape) in enumerate(zip(*outer_layers)[::-1]):
 decoder = Model(x_in, x)
 
 
-def sample(std, path):
+def sample(path, std=1):
     """采样查看生成效果（generate samples per epoch）
     """
     n = 9
@@ -185,7 +182,8 @@ def sample(std, path):
             digit = x_decoded[0].reshape(img_size, img_size, 3)
             figure[i * img_size: (i + 1) * img_size,
                    j * img_size: (j + 1) * img_size] = digit
-    figure = np.clip((figure+0.5)*256, 0, 255)
+    figure = (figure + 1) / 2 * 255
+    figure = np.clip(figure, 0, 255).astype('uint8')
     imageio.imwrite(path, figure)
 
 
@@ -194,7 +192,7 @@ class Evaluate(Callback):
         self.lowest = 1e10
     def on_epoch_end(self, epoch, logs=None):
         path = 'samples/test_%s.png' % epoch
-        sample(1, path)
+        sample(path, 0.9)
         if logs['loss'] <= self.lowest:
             self.lowest = logs['loss']
             encoder.save_weights('./best_encoder.weights')
