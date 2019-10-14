@@ -19,3 +19,6 @@ with Invertible 1×1 Convolutions, [intro]( https://kexue.fm/archives/5807))
 , [intro]( https://kexue.fm/archives/5977), [arxiv](https://arxiv.org/abs/1809.05861))
 
 <img src="https://kexue.fm/usr/uploads/2018/09/3123911138.png" height=256 />
+
+## 交流
+QQ交流群：67729435，微信群请加机器人微信号spaces_ac_cn
