@@ -20,5 +20,17 @@ with Invertible 1×1 Convolutions, [intro]( https://kexue.fm/archives/5807))
 
 <img src="https://kexue.fm/usr/uploads/2018/09/3123911138.png" height=256 />
 
+## 环境
+测试环境包括：
+- Keras 2.1.5 + tensorflow 1.2
+- Keras 2.2.0 + tensorflow 1.8
+- Keras 2.2.4 + tensorflow 1.13
+
+均在Python 2.7下测试。
+
+## 链接
+- https://kexue.fm/archives/5776
+- https://kexue.fm/archives/5807
+
 ## 交流
 QQ交流群：67729435，微信群请加机器人微信号spaces_ac_cn
